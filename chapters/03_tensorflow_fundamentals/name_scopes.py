@@ -27,11 +27,11 @@ with graph.as_default():
 
         with tf.name_scope("A"):
             A_mul = tf.mul(in_1, const)
-            A_out = tf.substract(A_mul, in_1)
+            A_out = tf.subtract(A_mul, in_1)
 
         with tf.name_scope("B"):
             B_mul = tf.mul(in_2, const)
-            B_out = tf.substract(B_mul, in_2)
+            B_out = tf.subtract(B_mul, in_2)
 
         with tf.name_scope("C"):
             C_div = tf.div(A_out, B_out)
