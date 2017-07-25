@@ -32,7 +32,7 @@ with graph.as_default():
         # Separate output layer
         with tf.name_scope("output"):
             d = tf.add(b, c, name="add_d")
-            output = tf.sub(d, previous_value, name="output")
+            output = tf.substract(d, previous_value, name="output")
             update_prev = previous_value.assign(output)
     
     # Summary Operations
