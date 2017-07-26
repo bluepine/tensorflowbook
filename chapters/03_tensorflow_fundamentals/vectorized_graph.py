@@ -37,9 +37,9 @@ with graph.as_default():
     
     # Summary Operations
     with tf.name_scope("summaries"):
-        tf.scalar_summary(b'output', output, name="output_summary")  # Creates summary for output node
-        tf.scalar_summary(b'product of inputs', b, name="prod_summary")
-        tf.scalar_summary(b'sum of inputs', c, name="sum_summary")
+        tf.summary.scalar(b'output', output, name="output_summary")  # Creates summary for output node
+        tf.summary.scalar(b'product of inputs', b, name="prod_summary")
+        tf.summary.scalar(b'sum of inputs', c, name="sum_summary")
     
     # Global Variables and Operations
     with tf.name_scope("global_ops"):
@@ -52,7 +52,7 @@ with graph.as_default():
 sess = tf.Session(graph=graph)
 
 # Open a SummaryWriter to save summaries
-writer = tf.train.SummaryWriter('./improved_graph', graph)
+writer = tf.summary.FileWriter('./improved_graph', graph)
 
 # Initialize Variables
 sess.run(init)
