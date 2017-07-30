@@ -19,7 +19,7 @@ def inference(X):
 
 
 def loss(X, Y):
-    return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(combine_inputs(X), Y))
+    return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = combine_inputs(X), labels = Y))
 
 
 def read_csv(batch_size, file_name, record_defaults):
@@ -46,7 +46,7 @@ def inputs():
         read_csv(100, "iris.data", [[0.0], [0.0], [0.0], [0.0], [""]])
 
     # convert class names to a 0 based class index.
-    label_number = tf.to_int32(tf.argmax(tf.to_int32(tf.pack([
+    label_number = tf.to_int32(tf.argmax(tf.to_int32(tf.stack([
         tf.equal(label, ["Iris-setosa"]),
         tf.equal(label, ["Iris-versicolor"]),
         tf.equal(label, ["Iris-virginica"])
@@ -54,7 +54,7 @@ def inputs():
 
     # Pack all the features that we care about in a single matrix;
     # We then transpose to have a matrix with one example per row and one feature per column.
-    features = tf.transpose(tf.pack([sepal_length, sepal_width, petal_length, petal_width]))
+    features = tf.transpose(tf.stack([sepal_length, sepal_width, petal_length, petal_width]))
 
     return features, label_number
 
