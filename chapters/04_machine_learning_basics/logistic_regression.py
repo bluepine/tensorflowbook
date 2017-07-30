@@ -84,6 +84,7 @@ with tf.Session() as sess:
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
+    print sess.run([X, Y])
     # actual training loop
     training_steps = 1000
     for step in range(training_steps):
