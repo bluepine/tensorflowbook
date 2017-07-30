@@ -29,7 +29,7 @@ def evaluate(sess, X, Y):
 # Launch the graph in a session, setup boilerplate
 with tf.Session() as sess:
 
-    tf.initialize_all_variables().run()
+    tf.global_variables_initializer().run()
 
     X, Y = inputs()
 

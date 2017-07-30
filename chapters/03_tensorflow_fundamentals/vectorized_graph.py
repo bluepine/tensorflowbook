@@ -44,7 +44,7 @@ with graph.as_default():
     # Global Variables and Operations
     with tf.name_scope("global_ops"):
         # Initialization Op
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
         # Collect all summary Ops in graph
         merged_summaries = tf.merge_all_summaries()
 

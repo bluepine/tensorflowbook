@@ -31,7 +31,7 @@ target = tf.placeholder(tf.float32, [None, 2])
 model = SequenceClassificationModel(data, target, params)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 for index, batch in enumerate(batches):
     feed = {data: batch[0], target: batch[1]}
     error, _ = sess.run([model.error, model.optimize], feed)
