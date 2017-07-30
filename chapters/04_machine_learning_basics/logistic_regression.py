@@ -20,7 +20,7 @@ def inference(X):
 
 
 def loss(X, Y):
-    return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(combine_inputs(X), Y))
+    return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = combine_inputs(X), labels = Y))
 
 
 def read_csv(batch_size, file_name, record_defaults):
@@ -54,7 +54,7 @@ def inputs():
 
     # Finally we pack all the features in a single matrix;
     # We then transpose to have a matrix with one example per row and one feature per column.
-    features = tf.transpose(tf.pack([is_first_class, is_second_class, is_third_class, gender, age]))
+    features = tf.transpose(tf.stack([is_first_class, is_second_class, is_third_class, gender, age]))
     survived = tf.reshape(survived, [100, 1])
 
     return features, survived
@@ -74,7 +74,7 @@ def evaluate(sess, X, Y):
 # Launch the graph in a session, setup boilerplate
 with tf.Session() as sess:
 
-    tf.initialize_all_variables().run()
+    tf.global_variables_initializer().run()
 
     X, Y = inputs()
 
