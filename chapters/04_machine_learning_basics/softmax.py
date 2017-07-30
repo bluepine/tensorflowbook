@@ -23,7 +23,7 @@ def loss(X, Y):
 
 
 def read_csv(batch_size, file_name, record_defaults):
-    filename_queue = tf.train.string_input_producer([os.path.dirname(__file__) + "/" + file_name])
+    filename_queue = tf.train.string_input_producer([os.path.join(os.getcwd(), file_name)])
 
     reader = tf.TextLineReader(skip_header_lines=1)
     key, value = reader.read(filename_queue)
@@ -37,7 +37,8 @@ def read_csv(batch_size, file_name, record_defaults):
     return tf.train.shuffle_batch(decoded,
                                   batch_size=batch_size,
                                   capacity=batch_size * 50,
-                                  min_after_dequeue=batch_size)
+                                  min_after_dequeue=batch_size,
+                                  allow_smaller_final_batch=True)
 
 
 def inputs():
@@ -73,8 +74,8 @@ def evaluate(sess, X, Y):
 
 # Launch the graph in a session, setup boilerplate
 with tf.Session() as sess:
-
     tf.global_variables_initializer().run()
+    tf.local_variables_initializer().run() #required by string_input_producer since we did  not specify epoch
 
     X, Y = inputs()
 
