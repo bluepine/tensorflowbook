@@ -75,7 +75,8 @@ def evaluate(sess, X, Y):
 with tf.Session() as sess:
     tf.global_variables_initializer().run()
     tf.local_variables_initializer().run() #required by string_input_producer since we did  not specify epoch
-
+    a = tf.stack([[1, 2], [3, 4]])
+    print sess.run([a])
     X, Y = inputs()
 
     total_loss = loss(X, Y)
@@ -86,6 +87,7 @@ with tf.Session() as sess:
 
     # actual training loop
     training_steps = 1000
+    print sess.run([X, Y])
     for step in range(training_steps):
         sess.run([train_op])
         # for debugging and learning purposes, see how the loss gets decremented thru training steps
