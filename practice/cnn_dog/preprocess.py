@@ -49,6 +49,8 @@ def write_records_file(dataset, record_location):
     current_index = 0
     for breed, images_filenames in dataset.items():
         for image_filename in images_filenames:
+            tf.reset_default_graph() #avoid growing the graph with each iteration
+            sess = tf.Session() 
             if current_index % 100 == 0:
                 if writer:
                     writer.close()
@@ -95,5 +97,8 @@ os.system('rm -rf ./output/testing-images ./output/training-images')
 os.system('mkdir -p ./output/testing-images ./output/training-images')
 write_records_file(testing_dataset, "./output/testing-images/testing-image")
 write_records_file(training_dataset, "./output/training-images/training-image")
+writer = tf.summary.FileWriter('./summary', tf.get_default_graph())
+writer.flush()
+writer.close()
 sess.close()
 
