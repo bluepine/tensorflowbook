@@ -1,4 +1,3 @@
-# setup-only-ignore
 import tensorflow as tf
 import glob, os
 from itertools import groupby
