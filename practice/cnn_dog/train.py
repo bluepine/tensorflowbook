@@ -31,7 +31,7 @@ def inputs(filename_queue):
     float_image_batch = tf.image.convert_image_dtype(image_batch, tf.float32)
     # Find every directory name in the imagenet-dogs directory (n02085620-Chihuahua, ...)
     labels = list(map(lambda c: c.split("/")[-1], glob.glob("../../imagenet-dogs-shrink/*")))
-
+    print labels
     # Match every label from label_batch and return the index where they exist in the list of classes
     train_labels = tf.map_fn(lambda l: tf.where(tf.equal(labels, l))[0,0:1][0], label_batch, dtype=tf.int64)
     return float_image_batch, train_labels
@@ -130,6 +130,11 @@ def fini(coord, threads, filename_queue):
     coord.request_stop()
     coord.join(threads)
 
+def log_graph():
+    writer = tf.summary.FileWriter('./summary', tf.get_default_graph())
+    writer.flush()
+    writer.close()
+
 with tf.Session() as sess:
     filename_queue = tf.train.string_input_producer(
         tf.train.match_filenames_once("./output/training-images/*.tfrecords"))
@@ -139,6 +144,7 @@ with tf.Session() as sess:
     total_loss = loss(Y_, Y)
     train_op = train(total_loss)
 
+    log_graph()
     print 'ready to run computation graph'
     coord, threads = init()
 
