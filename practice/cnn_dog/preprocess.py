@@ -13,7 +13,7 @@ training_dataset = defaultdict(list)
 testing_dataset = defaultdict(list)
 
 # Split up the filename into its breed and corresponding filename. The breed is found by taking the directory name
-image_filename_with_breed = map(lambda filename: (filename.split("/")[2], filename), image_filenames)
+image_filename_with_breed = map(lambda filename: (filename.split("/")[-2], filename), image_filenames)
 
 # Group each image by the breed which is the 0th element in the tuple returned above
 for dog_breed, breed_images in groupby(image_filename_with_breed, lambda x: x[0]):
@@ -47,6 +47,7 @@ def write_records_file(dataset, record_location):
     # images to avoid a slowdown in writing.
     current_index = 0
     for breed, images_filenames in dataset.items():
+        print breed
         for image_filename in images_filenames:
             tf.reset_default_graph() #avoid growing the graph with each iteration
             sess = tf.Session() 

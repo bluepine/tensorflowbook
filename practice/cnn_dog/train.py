@@ -1,5 +1,6 @@
 import tensorflow as tf
 import glob
+from tensorflow.python import debug as tf_debug
 
 BATCH_SIZE = 3
 
@@ -34,7 +35,7 @@ def inputs(filename_queue):
     print labels
     # Match every label from label_batch and return the index where they exist in the list of classes
     train_labels = tf.map_fn(lambda l: tf.where(tf.equal(labels, l))[0,0:1][0], label_batch, dtype=tf.int64)
-    return float_image_batch, train_labels
+    return float_image_batch, train_labels, label_batch
 
 
 def build_nn(float_image_batch):
@@ -135,10 +136,20 @@ def log_graph():
     writer.flush()
     writer.close()
 
+def run_graph(sess):
+    # actual training loop
+    training_steps = 1000
+    for step in range(training_steps):
+        sess.run([train_op])
+        # for debugging and learning purposes, see how the loss gets decremented thru training steps
+        if step % 10 == 0:
+            print "loss: ", sess.run([total_loss])
+
 with tf.Session() as sess:
+#    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     filename_queue = tf.train.string_input_producer(
         tf.train.match_filenames_once("./output/training-images/*.tfrecords"))
-    X, Y = inputs(filename_queue)
+    X, Y, Z = inputs(filename_queue)
     Y_ = build_nn(X)
     train_prediction = tf.nn.softmax(Y_)
     total_loss = loss(Y_, Y)
@@ -148,14 +159,10 @@ with tf.Session() as sess:
     print 'ready to run computation graph'
     coord, threads = init()
 
-    # actual training loop
-    training_steps = 1000
-    for step in range(training_steps):
-        sess.run([train_op])
-        # for debugging and learning purposes, see how the loss gets decremented thru training steps
-        if step % 10 == 0:
-            print "loss: ", sess.run([total_loss])
+    print sess.run([Z])
 
-    print sess.run([train_prediction])
+#    run_graph([sess])
+
+    # print sess.run([train_prediction])
 
     fini(coord, threads, filename_queue)
