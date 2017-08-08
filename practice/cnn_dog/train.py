@@ -138,7 +138,7 @@ def log_graph():
 
 def run_graph(sess):
     # actual training loop
-    training_steps = 1000
+    training_steps = 100
     for step in range(training_steps):
         sess.run([train_op])
         # for debugging and learning purposes, see how the loss gets decremented thru training steps
@@ -161,8 +161,8 @@ with tf.Session() as sess:
 
     print sess.run([Z])
 
-#    run_graph([sess])
+    run_graph(sess)
 
-    # print sess.run([train_prediction])
+    print sess.run([train_prediction])
 
     fini(coord, threads, filename_queue)
