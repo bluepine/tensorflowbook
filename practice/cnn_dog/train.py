@@ -53,7 +53,7 @@ def build_nn(float_image_batch):
 
     # Note, the first and last dimension of the convolution output hasn't changed but the
     # middle two dimensions have.
-    print conv2d_layer_one.get_shape(), pool_layer_one.get_shape()
+    print 'conv layer one shape', conv2d_layer_one.get_shape(), 'pooling layer one shape', pool_layer_one.get_shape()
 
     conv2d_layer_two = tf.contrib.layers.convolution2d(
         pool_layer_one,
@@ -69,7 +69,7 @@ def build_nn(float_image_batch):
                                     strides=[1, 2, 2, 1],
                                     padding='SAME')
 
-    print conv2d_layer_two.get_shape(), pool_layer_two.get_shape()
+    print 'conv layer two shape', conv2d_layer_two.get_shape(), 'pooling layer two shape', pool_layer_two.get_shape()
 
     flattened_layer_two = tf.reshape(
         pool_layer_two,
@@ -77,8 +77,7 @@ def build_nn(float_image_batch):
             BATCH_SIZE,  # Each image in the image_batch
             -1           # Every other dimension of the input
         ])
-
-    print flattened_layer_two.get_shape()
+    print 'flattened layer two shape', flattened_layer_two.get_shape()
 
     # The weights_initializer parameter can also accept a callable, a lambda is used here  returning a truncated normal
     # with a stddev specified.
