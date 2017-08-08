@@ -37,7 +37,7 @@ def inputs(filename_queue):
     return float_image_batch, train_labels
 
 
-def build_graph(float_image_batch):
+def build_nn(float_image_batch):
     conv2d_layer_one = tf.contrib.layers.convolution2d(
     float_image_batch,
     num_outputs=32,     # The number of filters to generate
@@ -135,7 +135,7 @@ with tf.Session() as sess:
     filename_queue = tf.train.string_input_producer(
         tf.train.match_filenames_once("./output/training-images/*.tfrecords"))
     X, Y = inputs(filename_queue)
-    Y_ = build_graph(X)
+    Y_ = build_nn(X)
     train_prediction = tf.nn.softmax(Y_)
     total_loss = loss(Y_, Y)
     train_op = train(total_loss)
