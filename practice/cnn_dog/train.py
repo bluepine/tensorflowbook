@@ -1,6 +1,7 @@
 import tensorflow as tf
 import glob
 
+BATCH_SIZE = 3
 
 def inputs(filename_queue):
     reader = tf.TFRecordReader()
@@ -22,10 +23,9 @@ def inputs(filename_queue):
     label = tf.cast(features['label'], tf.string)
 
     min_after_dequeue = 10
-    batch_size = 3
-    capacity = min_after_dequeue + 3 * batch_size
+    capacity = min_after_dequeue + 3 * BATCH_SIZE
     image_batch, label_batch = tf.train.shuffle_batch(
-        [image, label], batch_size=batch_size, capacity=capacity, min_after_dequeue=min_after_dequeue)
+        [image, label], batch_size=BATCH_SIZE, capacity=capacity, min_after_dequeue=min_after_dequeue)
 
     # Converting the images to a float of [0,1) to match the expected input to convolution2d
     float_image_batch = tf.image.convert_image_dtype(image_batch, tf.float32)
@@ -74,7 +74,7 @@ def build_nn(float_image_batch):
     flattened_layer_two = tf.reshape(
         pool_layer_two,
         [
-            batch_size,  # Each image in the image_batch
+            BATCH_SIZE,  # Each image in the image_batch
             -1           # Every other dimension of the input
         ])
 
@@ -140,6 +140,7 @@ with tf.Session() as sess:
     total_loss = loss(Y_, Y)
     train_op = train(total_loss)
 
+    print 'ready to run computation graph'
     coord, threads = init()
 
     # actual training loop
