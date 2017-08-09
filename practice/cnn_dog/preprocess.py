@@ -47,7 +47,6 @@ def write_records_file(dataset, record_location):
     # images to avoid a slowdown in writing.
     current_index = 0
     for breed, images_filenames in dataset.items():
-        print breed
         for image_filename in images_filenames:
             tf.reset_default_graph() #avoid growing the graph with each iteration
             sess = tf.Session() 
@@ -84,7 +83,7 @@ def write_records_file(dataset, record_location):
             # integer index or a one-hot encoded rank one tensor.
             # https://en.wikipedia.org/wiki/One-hot
             image_label = breed.encode("utf-8")
-
+            print breed
             example = tf.train.Example(features=tf.train.Features(feature={
                 'label': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_label])),
                 'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_bytes]))

@@ -138,7 +138,7 @@ def log_graph():
 
 def run_graph(sess, watch_list):
     # actual training loop
-    training_steps = 10
+    training_steps = 1000
     for step in range(training_steps):
         if (len(watch_list) > 0):
             print sess.run([watch_list])
@@ -169,7 +169,7 @@ with tf.Session() as sess:
     # print sess.run([Z])
     # print sess.run([Z])
 
-    run_graph(sess, [Y, Z])
+    run_graph(sess, [Y])
 
     print sess.run([accuracy_measure, Y, Y_])
 
