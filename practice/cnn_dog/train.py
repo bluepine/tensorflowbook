@@ -2,7 +2,7 @@ import tensorflow as tf
 import glob
 from tensorflow.python import debug as tf_debug
 
-BATCH_SIZE = 3
+BATCH_SIZE = 5
 
 def inputs(filename_queue):
     reader = tf.TFRecordReader()
@@ -96,7 +96,7 @@ def build_nn(float_image_batch):
     # available to train on.
     final_fully_connected = tf.contrib.layers.fully_connected(
         hidden_layer_three,
-        120,  # Number of dog breeds in the ImageNet Dogs dataset
+        2,  # Number of dog breeds in the ImageNet Dogs dataset
         #    weights_initializer=lambda i, dtype: tf.truncated_normal([512, 120], stddev=0.1)
     )
     return final_fully_connected
@@ -136,14 +136,20 @@ def log_graph():
     writer.flush()
     writer.close()
 
-def run_graph(sess):
+def run_graph(sess, watch_list):
     # actual training loop
-    training_steps = 100
+    training_steps = 10
     for step in range(training_steps):
+        if (len(watch_list) > 0):
+            print sess.run([watch_list])
         sess.run([train_op])
         # for debugging and learning purposes, see how the loss gets decremented thru training steps
         if step % 10 == 0:
             print "loss: ", sess.run([total_loss])
+
+def accuracy(Y_, Y):
+    predicted = tf.cast(tf.arg_max(Y_, 1), tf.int32)
+    return tf.reduce_mean(tf.cast(tf.equal(predicted, Y), tf.float32))
 
 with tf.Session() as sess:
 #    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
@@ -151,18 +157,20 @@ with tf.Session() as sess:
         tf.train.match_filenames_once("./output/training-images/*.tfrecords"))
     X, Y, Z = inputs(filename_queue)
     Y_ = build_nn(X)
-    train_prediction = tf.nn.softmax(Y_)
+
     total_loss = loss(Y_, Y)
     train_op = train(total_loss)
-
+    accuracy_measure = loss(Y_, Y)
     log_graph()
     print 'ready to run computation graph'
     coord, threads = init()
 
-    print sess.run([Z])
+    # print sess.run([Z])
+    # print sess.run([Z])
+    # print sess.run([Z])
 
-    run_graph(sess)
+    run_graph(sess, [Y, Z])
 
-    print sess.run([train_prediction])
+    print sess.run([accuracy_measure, Y, Y_])
 
     fini(coord, threads, filename_queue)
