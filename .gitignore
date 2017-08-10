@@ -2,3 +2,4 @@
 *.jpg
 *.tfrecords
 summary
+log

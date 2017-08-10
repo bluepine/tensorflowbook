@@ -34,8 +34,21 @@ def build_where_test():
     where = tf.where(input_dump)
     return where
 
+def build_map_fn_test():
+    input = tf.to_int32(tf.random_uniform([5, 2]) > 0.5)
+    size = np.prod(input.shape)
+    input_dump = tf.Print(input, [input], summarize=size)
+    m = tf.map_fn(lambda l: l * 2, input_dump)
+    return m
+
+def log_graph(log_dir):
+    writer = tf.summary.FileWriter(log_dir, tf.get_default_graph())
+    writer.flush()
+    writer.close()
+
 with tf.Session() as sess:
-    result = build_where_test()
+    result = build_map_fn_test()
+    log_graph('./log')
     try:
         coord, threads = init()
         print sess.run([result])
