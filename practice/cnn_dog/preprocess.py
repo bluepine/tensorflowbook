@@ -86,7 +86,8 @@ def write_records_file(dataset, record_location):
             print breed
             example = tf.train.Example(features=tf.train.Features(feature={
                 'label': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_label])),
-                'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_bytes]))
+                'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_bytes])),
+                'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_filename]))
             }))
 
             writer.write(example.SerializeToString())

@@ -2,7 +2,7 @@ import tensorflow as tf
 import glob
 from tensorflow.python import debug as tf_debug
 
-BATCH_SIZE = 3
+BATCH_SIZE = 10
 
 def inputs(filename_queue):
     reader = tf.TFRecordReader()
@@ -13,6 +13,7 @@ def inputs(filename_queue):
         features={
             'label': tf.FixedLenFeature([], tf.string),
             'image': tf.FixedLenFeature([], tf.string),
+            'filename': tf.FixedLenFeature([], tf.string)
         })
 
     record_image = tf.decode_raw(features['image'], tf.uint8)
@@ -20,13 +21,14 @@ def inputs(filename_queue):
     # Changing the image into this shape helps train and visualize the output by converting it to
     # be organized like an image.
     image = tf.reshape(record_image, [250, 151, 1])
-
     label = tf.cast(features['label'], tf.string)
+    filename = tf.cast(features['filename'], tf.string)
+#    image_dump = tf.Print(image, [filename])
 
     min_after_dequeue = BATCH_SIZE * 3
-    capacity = min_after_dequeue + 3 * BATCH_SIZE
-    image_batch, label_batch = tf.train.shuffle_batch(
-        [image, label], batch_size=BATCH_SIZE, capacity=capacity, min_after_dequeue=min_after_dequeue)
+    capacity = min_after_dequeue + 10 * BATCH_SIZE
+    image_batch, label_batch, filename_batch = tf.train.shuffle_batch(
+        [image, label, filename], batch_size=BATCH_SIZE, capacity=capacity, min_after_dequeue=min_after_dequeue)
 
     # Converting the images to a float of [0,1) to match the expected input to convolution2d
     float_image_batch = tf.image.convert_image_dtype(image_batch, tf.float32)
@@ -35,7 +37,7 @@ def inputs(filename_queue):
     print labels
     # Match every label from label_batch and return the index where they exist in the list of classes
     train_labels = tf.map_fn(lambda l: tf.where(tf.equal(labels, l))[0,0:1][0], label_batch, dtype=tf.int64)
-    return float_image_batch, train_labels, label_batch
+    return float_image_batch, train_labels, label_batch, filename_batch
 
 
 def build_nn(float_image_batch):
@@ -99,7 +101,7 @@ def build_nn(float_image_batch):
         2,  # Number of dog breeds in the ImageNet Dogs dataset
         #    weights_initializer=lambda i, dtype: tf.truncated_normal([512, 120], stddev=0.1)
     )
-    return final_fully_connected
+    return tf.nn.softmax(final_fully_connected)
 
 def loss(predict_label_batch, train_label_batch):
     return tf.reduce_mean(
@@ -107,17 +109,14 @@ def loss(predict_label_batch, train_label_batch):
             logits=predict_label_batch, labels=train_label_batch))
 
 def train(total_loss):
-    batch = tf.Variable(0)
-    learning_rate = tf.train.exponential_decay(
-        0.01,
-        batch * 3,
-        120,
-        0.95,
-        staircase=True)
+    global_step = tf.Variable(0, trainable=False)
+    starter_learning_rate = 0.1
+    learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
+                                               100000, 0.96, staircase=True)
 
     return tf.train.AdamOptimizer(
         learning_rate, 0.9).minimize(
-        total_loss, global_step=batch)
+            total_loss, global_step=global_step)
 
 def init():
     tf.global_variables_initializer().run()
@@ -160,7 +159,7 @@ with tf.Session() as sess:
     filename_queue = tf.train.string_input_producer(
         tf.train.match_filenames_once("./output/training-images/*.tfrecords")
     )
-    X, Y, Z = inputs(filename_queue)
+    X, Y, Z, F = inputs(filename_queue)
     Y_ = build_nn(X)
 
     total_loss = loss(Y_, Y)
@@ -172,16 +171,15 @@ with tf.Session() as sess:
     print 'ready to run computation graph'
     coord, threads = init()
 
-    # print sess.run([Z])
-    # print sess.run([Z])
-    # print sess.run([Z])
+    #run_graph(sess, [accuracy_measure, Y, prediction_result, Y_])
 
- #   saver.restore(sess, checkpoint_file)
-    run_graph(sess, [accuracy_measure, Y, prediction_result, Y_])
+    saver.restore(sess, checkpoint_file)
+    for i in range(0, 100):
+        print sess.run([accuracy_measure, Y, prediction_result])
 
-    save_path = saver.save(sess, checkpoint_file)
-    print("Model saved in file: %s" % save_path)
 
-    print sess.run([accuracy_measure, Y, prediction_result, Y_])
+    # save_path = saver.save(sess, checkpoint_file)
+    # print("Model saved in file: %s" % save_path)
+
 
     fini(coord, threads, filename_queue)
