@@ -154,7 +154,8 @@ def accuracy(Y_, Y):
 with tf.Session() as sess:
 #    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     filename_queue = tf.train.string_input_producer(
-        tf.train.match_filenames_once("./output/training-images/*.tfrecords"))
+        tf.train.match_filenames_once("./output/training-images/*.tfrecords")
+    )
     X, Y, Z = inputs(filename_queue)
     Y_ = build_nn(X)
 

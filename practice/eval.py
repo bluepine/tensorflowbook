@@ -14,9 +14,23 @@ def fini(coord, threads, filename_queue):
     coord.join(threads)
 
 with tf.Session() as sess:
-    coord, threads = init()
+    input = tf.random_normal([])
+    BATCH_SIZE = 2
+    min_after_dequeue = BATCH_SIZE * 2
+    capacity = min_after_dequeue + 5 * BATCH_SIZE
+    input_dump = tf.Print(input, [input])
+    shuffled_batch = tf.train.shuffle_batch(
+        [input_dump],
+        batch_size=BATCH_SIZE,
+        capacity=capacity,
+        min_after_dequeue=min_after_dequeue)
+
+    print shuffled_batch
     try:
-        print sess.run([])
+        coord, threads = init()
+        print sess.run([shuffled_batch])
+        print sess.run([shuffled_batch])
+        print sess.run([shuffled_batch])
     except Exception, e:
         coord.request_stop(e)
         print e
