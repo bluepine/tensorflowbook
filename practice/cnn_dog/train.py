@@ -2,7 +2,7 @@ import tensorflow as tf
 import glob
 from tensorflow.python import debug as tf_debug
 
-BATCH_SIZE = 5
+BATCH_SIZE = 3
 
 def inputs(filename_queue):
     reader = tf.TFRecordReader()
@@ -23,7 +23,7 @@ def inputs(filename_queue):
 
     label = tf.cast(features['label'], tf.string)
 
-    min_after_dequeue = 10
+    min_after_dequeue = BATCH_SIZE * 3
     capacity = min_after_dequeue + 3 * BATCH_SIZE
     image_batch, label_batch = tf.train.shuffle_batch(
         [image, label], batch_size=BATCH_SIZE, capacity=capacity, min_after_dequeue=min_after_dequeue)
@@ -147,11 +147,15 @@ def run_graph(sess, watch_list):
         if step % 10 == 0:
             print "loss: ", sess.run([total_loss])
 
-def accuracy(Y_, Y):
-    predicted = tf.cast(tf.arg_max(Y_, 1), tf.int32)
+def prediction(Y_):
+    predicted = tf.cast(tf.arg_max(Y_, 1), tf.int64)
+    return predicted
+
+def accuracy(predicted, Y):
     return tf.reduce_mean(tf.cast(tf.equal(predicted, Y), tf.float32))
 
 with tf.Session() as sess:
+    checkpoint_file = "./model.ckpt"
 #    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     filename_queue = tf.train.string_input_producer(
         tf.train.match_filenames_once("./output/training-images/*.tfrecords")
@@ -161,7 +165,9 @@ with tf.Session() as sess:
 
     total_loss = loss(Y_, Y)
     train_op = train(total_loss)
-    accuracy_measure = loss(Y_, Y)
+    prediction_result = prediction(Y_)
+    accuracy_measure = accuracy(prediction_result, Y)
+    saver = tf.train.Saver()
     log_graph()
     print 'ready to run computation graph'
     coord, threads = init()
@@ -170,8 +176,12 @@ with tf.Session() as sess:
     # print sess.run([Z])
     # print sess.run([Z])
 
-    run_graph(sess, [Y])
+ #   saver.restore(sess, checkpoint_file)
+    run_graph(sess, [accuracy_measure, Y, prediction_result, Y_])
 
-    print sess.run([accuracy_measure, Y, Y_])
+    save_path = saver.save(sess, checkpoint_file)
+    print("Model saved in file: %s" % save_path)
+
+    print sess.run([accuracy_measure, Y, prediction_result, Y_])
 
     fini(coord, threads, filename_queue)
