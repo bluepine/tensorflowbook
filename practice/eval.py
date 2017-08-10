@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 def init():
     tf.global_variables_initializer().run()
@@ -14,6 +15,7 @@ def fini(coord, threads, filename_queue):
     coord.join(threads)
 
 def build_shuffle_batch_test():
+    input = tf.random_normal([])
     BATCH_SIZE = 2
     min_after_dequeue = BATCH_SIZE * 2
     capacity = min_after_dequeue + 5 * BATCH_SIZE
@@ -25,16 +27,18 @@ def build_shuffle_batch_test():
         min_after_dequeue=min_after_dequeue)
     return shuffled_batch
 
+def build_where_test():
+    input = tf.random_uniform([2, 5, 5]) > 0.5
+    size = np.prod(input.shape)
+    input_dump = tf.Print(input, [input], summarize=size)
+    where = tf.where(input_dump)
+    return where
 
 with tf.Session() as sess:
-    input = tf.random_normal([])
-    shuffled_batch = build_shuffle_batch_test()
-
+    result = build_where_test()
     try:
         coord, threads = init()
-        print sess.run([shuffled_batch])
-        print sess.run([shuffled_batch])
-        print sess.run([shuffled_batch])
+        print sess.run([result])
     except Exception, e:
         coord.request_stop(e)
         print e
